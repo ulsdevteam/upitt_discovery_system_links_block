@@ -9,7 +9,6 @@
 ?>
 <?php if ($object_label): ?>
 <div>
-  <strong><?php print $object_label; ?></strong>
   <?php if (count($links) > 0): ?>
   <ul>
   <?php endif; ?>
