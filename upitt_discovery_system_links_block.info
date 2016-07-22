@@ -1,0 +1,6 @@
+name = University of Pittsburgh Discovery System Links Block
+description = Adds a block to display related Discovery System links (Pittcat and Worldcat) for matching islandora objects.
+package = Islandora Tools
+version = 7.x-1.6
+core = 7.x
+dependencies[] = islandora

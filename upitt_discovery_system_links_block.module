@@ -1,0 +1,54 @@
+<?php
+
+/**
+ * Implements hook_block_info().
+ */
+function upitt_discovery_system_links_block_block_info() {
+  return array('discovery_system_links_block' => array(
+      'info' => t('Pittcat Block'),
+      'cache' => DRUPAL_CACHE_PER_PAGE,
+      'status' => TRUE,
+      'region' => 'sidebar_first',
+    ));
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function upitt_discovery_system_links_block_block_view($delta = '') {
+  if ($delta == "*uninitialized*") { exit; }
+  if ($delta == 'discovery_system_links_block') {
+    // do something
+    $item = menu_get_item();
+    if (isset($item['page_arguments'][0]) && is_object($item['page_arguments'][0]) && (get_class($item['page_arguments'][0]) == 'IslandoraFedoraObject')) {
+      $fedora_object = $item['page_arguments'][0];
+      if (is_object($fedora_object)) {
+        $block['subject'] = 'Discovery System Links';
+        $block['pages'] = 'islandora/object/*';
+        $block['content'] =  theme('upitt_discovery_system_links_block',array('object_label' => $fedora_object->label,
+                'links' => _get_discovery_links($fedora_object),
+                ));
+        return $block;
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function upitt_discovery_system_links_block_theme() {
+  return array(
+    'upitt_discovery_system_links_block' => array(
+      'template' => 'templates/upitt_discovery_system_links_block',
+    )
+  );
+}
+
+function _get_discovery_links(IslandoraFedoraObject $fedora_object) {
+  $links = array();
+  $options = array();
+  $links[] = l('PittCat', 'http://foobar.com', $options);
+  $links[] = l('WorldCat', 'http://foobar.com', $options);
+  return $links;
+}
