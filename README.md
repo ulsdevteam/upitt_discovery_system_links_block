@@ -1,4 +1,4 @@
-# upitt_pittcat_block
+# upitt_discovery_system_links_block
 
 Copyright 2016 (c) University of Pittsburgh
 
