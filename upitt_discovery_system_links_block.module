@@ -51,12 +51,12 @@ function _get_discovery_links($pittcat, $worldcat) {
   $options = array('attributes' => array('target'=>'_blank'));
   $path = drupal_get_path('module', 'upitt_discovery_system_links_block');
   if ($pittcat) {
-    $img = '<img src="' . $path . '/images/pittcat.png">';
-    $links[] = l($img, 'http://pittcat.pitt.edu/cgi-bin/Pwebrecon.cgi?Search_Arg=' . $pittcat . '&Search_Code=FT*&CNT=50', $options) . l('PittCat', 'http://pittcat.pitt.edu/cgi-bin/Pwebrecon.cgi?Search_Arg=' . $pittcat . '&Search_Code=FT*&CNT=50', $options);
+    $img = '<a href="http://pittcat.pitt.edu/cgi-bin/Pwebrecon.cgi?Search_Arg=' . $pittcat . '&Search_Code=FT*&CNT=50"><img src="/' . $path . '/images/pittcat.png"></a>';
+    $links[] = $img . l('PittCat', 'http://pittcat.pitt.edu/cgi-bin/Pwebrecon.cgi?Search_Arg=' . $pittcat . '&Search_Code=FT*&CNT=50', $options);
   }
   if ($worldcat) {
-    $img = '<img src="' . $path . '/images/worldcat.png">';
-    $links[] = l($img, 'https://www.worldcat.org/title/search/oclc/' . $worldcat . '&referer=brief_results', $options) . l('WorldCat', 'https://www.worldcat.org/title/search/oclc/' . $worldcat . '&referer=brief_results', $options);
+    $img = '<a href="https://www.worldcat.org/title/search/oclc/' . $worldcat . '&referer=brief_results"><img src="/' . $path . '/images/worldcat.png"></a>';
+    $links[] = $img . l('WorldCat', 'https://www.worldcat.org/title/search/oclc/' . $worldcat . '&referer=brief_results', $options);
   }
   return $links;
 }
