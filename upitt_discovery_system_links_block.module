@@ -5,10 +5,10 @@
  */
 function upitt_discovery_system_links_block_block_info() {
   return array('discovery_system_links_block' => array(
-      'info' => t('Pittcat Block'),
+      'info' => t('Discovery Links Block'),
       'cache' => DRUPAL_CACHE_PER_PAGE,
       'status' => TRUE,
-      'region' => 'sidebar_first',
+      'region' => 'sidebar',
     ));
 }
 
@@ -22,11 +22,12 @@ function upitt_discovery_system_links_block_block_view($delta = '') {
     $item = menu_get_item();
     if (isset($item['page_arguments'][0]) && is_object($item['page_arguments'][0]) && (get_class($item['page_arguments'][0]) == 'IslandoraFedoraObject')) {
       $fedora_object = $item['page_arguments'][0];
-      if (is_object($fedora_object)) {
+      list($pittcat, $worldcat) = _discovery_identifiers($fedora_object);
+      if (is_object($fedora_object) && ($pittcat <> '' || $worldcat <> '') ) {
         $block['subject'] = 'Discovery System Links';
         $block['pages'] = 'islandora/object/*';
         $block['content'] =  theme('upitt_discovery_system_links_block',array('object_label' => $fedora_object->label,
-                'links' => _get_discovery_links($fedora_object),
+                'links' => _get_discovery_links($pittcat, $worldcat),
                 ));
         return $block;
       }
@@ -45,10 +46,52 @@ function upitt_discovery_system_links_block_theme() {
   );
 }
 
-function _get_discovery_links(IslandoraFedoraObject $fedora_object) {
+function _get_discovery_links($pittcat, $worldcat) {
   $links = array();
-  $options = array();
-  $links[] = l('PittCat', 'http://foobar.com', $options);
-  $links[] = l('WorldCat', 'http://foobar.com', $options);
+  $options = array('attributes' => array('target'=>'_blank'));
+  $path = drupal_get_path('module', 'upitt_discovery_system_links_block');
+  if ($pittcat) {
+    $img = '<img src="' . $path . '/images/pittcat.png">';
+    $links[] = l($img, 'http://pittcat.pitt.edu/cgi-bin/Pwebrecon.cgi?Search_Arg=' . $pittcat . '&Search_Code=FT*&CNT=50', $options) . l('PittCat', 'http://pittcat.pitt.edu/cgi-bin/Pwebrecon.cgi?Search_Arg=' . $pittcat . '&Search_Code=FT*&CNT=50', $options);
+  }
+  if ($worldcat) {
+    $img = '<img src="' . $path . '/images/worldcat.png">';
+    $links[] = l($img, 'https://www.worldcat.org/title/search/oclc/' . $worldcat . '&referer=brief_results', $options) . l('WorldCat', 'https://www.worldcat.org/title/search/oclc/' . $worldcat . '&referer=brief_results', $options);
+  }
   return $links;
+}
+
+function _discovery_identifiers(IslandoraFedoraObject $fedora_object) {
+  // run a SOLR query to inspect the values for this PID in the system
+  module_load_include('inc', 'islandora_solr_search', 'includes/utilities');
+  $query_processor = new IslandoraSolrQueryProcessor();
+  $query_processor->solrQuery = '(PID:' . str_replace(":", "\:", $fedora_object->id) . ')';
+  $query_processor->solrStart = 0;
+  $query_processor->solrLimit = 1;
+  $query_processor->solrParams = array(
+    'fl' => "PID,fgs_label_s,mods_identifier_pitt_s,mods_relatedItem_otherFormat_identifier_local_s",
+    'fq' => "",
+  );
+  $url = parse_url(variable_get('islandora_solr_url', 'localhost:8080/solr'));
+  $solr = new Apache_Solr_Service($url['host'], $url['port'], $url['path'] . '/');
+  $solr->setCreateDocuments(FALSE);
+  $results = array();
+  $pittcat = $worldcat = '';
+  try {
+    $search_results = $solr->search($query_processor->solrQuery, $query_processor->solrStart, $query_processor->solrLimit, $query_processor->solrParams, 'GET');
+    $tmp = json_decode($search_results->getRawResponse(), TRUE);
+    if ($tmp['response']['numFound'] > 0) {
+      $results = array();
+      foreach ($tmp['response']['docs'] as $trip) {
+        $pittcat = $trip['mods_identifier_pitt_s'];
+        $had_ocolc = (stristr($trip['mods_relatedItem_otherFormat_identifier_local_s'], '(OCOLC)') <> '');
+        $worldcat = str_ireplace('(ocolc)', '', $trip['mods_relatedItem_otherFormat_identifier_local_s']);
+      }
+    }
+  }
+  catch (Exception $e) {
+  }
+
+  // return array format as expected as three elements:  pittcat ID, worldcat ID
+  return array($pittcat, $worldcat);
 }
