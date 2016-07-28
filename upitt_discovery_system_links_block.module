@@ -68,7 +68,7 @@ function _get_discovery_links($pittcat, $worldcat) {
   } */
   if ($worldcat) {
     $img = '<a href="https://www.worldcat.org/title/search/oclc/' . $worldcat . '&referer=brief_results"><img src="/' . $path . '/images/worldcat.png"></a>';
-    $links[] = $img . l('WorldCat', 'https://www.worldcat.org/title/search/oclc/' . $worldcat . '&referer=brief_results', $options);
+    $links[] = $img . ' ' . l('WorldCat', 'https://www.worldcat.org/title/search/oclc/' . $worldcat . '&referer=brief_results', $options);
   }
   return $links;
 }

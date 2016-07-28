@@ -8,7 +8,7 @@
  */
 ?>
 <?php if ($object_label): ?>
-<div>
+<div class="item-list">
   <?php if (count($links) > 0): ?>
   <ul>
   <?php endif; ?>
