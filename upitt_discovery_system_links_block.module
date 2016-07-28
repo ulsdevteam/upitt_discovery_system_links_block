@@ -22,14 +22,26 @@ function upitt_discovery_system_links_block_block_view($delta = '') {
     $item = menu_get_item();
     if (isset($item['page_arguments'][0]) && is_object($item['page_arguments'][0]) && (get_class($item['page_arguments'][0]) == 'IslandoraFedoraObject')) {
       $fedora_object = $item['page_arguments'][0];
+      $content_models = $fedora_object->relationships->get(FEDORA_MODEL_URI, 'hasModel');
+      $book_or_collection = false;
+      foreach ($content_models as $content_model) {
+        $book_or_collection |= ($content_model['object']['value'] == 'islandora:bookCModel') || ($content_model['object']['value'] == 'islandora:collectionCModel');
+      }
       list($pittcat, $worldcat) = _discovery_identifiers($fedora_object);
-      if (is_object($fedora_object) && ($pittcat <> '' || $worldcat <> '') ) {
-        $block['subject'] = 'Discovery System Links';
-        $block['pages'] = 'islandora/object/*';
-        $block['content'] =  theme('upitt_discovery_system_links_block',array('object_label' => $fedora_object->label,
-                'links' => _get_discovery_links($pittcat, $worldcat),
-                ));
-        return $block;
+      if ($book_or_collection && (is_object($fedora_object) && ($pittcat <> '' || $worldcat <> '')) ) {
+        $links = _get_discovery_links($pittcat, $worldcat);
+        if (count($links) > 0) {
+          $block['subject'] = 'Discovery System Links';
+          $block['pages'] = 'islandora/object/*';
+          $block['content'] =  theme('upitt_discovery_system_links_block',
+            array('object_label' => $fedora_object->label, 
+                  'links' => $links,                  
+            ));
+          return $block;
+        }
+        else {
+          return '';
+        }
       }
     }
   }
@@ -50,10 +62,10 @@ function _get_discovery_links($pittcat, $worldcat) {
   $links = array();
   $options = array('attributes' => array('target'=>'_blank'));
   $path = drupal_get_path('module', 'upitt_discovery_system_links_block');
-  if ($pittcat) {
+/*  if ($pittcat) {
     $img = '<a href="http://pittcat.pitt.edu/cgi-bin/Pwebrecon.cgi?Search_Arg=' . $pittcat . '&Search_Code=FT*&CNT=50"><img src="/' . $path . '/images/pittcat.png"></a>';
     $links[] = $img . l('PittCat', 'http://pittcat.pitt.edu/cgi-bin/Pwebrecon.cgi?Search_Arg=' . $pittcat . '&Search_Code=FT*&CNT=50', $options);
-  }
+  } */
   if ($worldcat) {
     $img = '<a href="https://www.worldcat.org/title/search/oclc/' . $worldcat . '&referer=brief_results"><img src="/' . $path . '/images/worldcat.png"></a>';
     $links[] = $img . l('WorldCat', 'https://www.worldcat.org/title/search/oclc/' . $worldcat . '&referer=brief_results', $options);
