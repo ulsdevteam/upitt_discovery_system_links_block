@@ -25,11 +25,13 @@ function upitt_discovery_system_links_block_block_view($delta = '') {
       $content_models = $fedora_object->relationships->get(FEDORA_MODEL_URI, 'hasModel');
       $book_or_collection = false;
       foreach ($content_models as $content_model) {
-        $book_or_collection |= ($content_model['object']['value'] == 'islandora:bookCModel') || ($content_model['object']['value'] == 'islandora:collectionCModel');
+        $book_or_collection |= ($content_model['object']['value'] == 'islandora:bookCModel') || ($content_model['object']['value'] == 'islandora:manuscriptCModel') || ($content_model['object']['value'] == 'islandora:collectionCModel');
       }
       list($pittcat, $worldcat) = _discovery_identifiers($fedora_object);
-      if ($book_or_collection && (is_object($fedora_object) && ($pittcat <> '' || $worldcat <> '')) ) {
+      if ($book_or_collection && (is_object($fedora_object) /*  && ($pittcat <> '' || $worldcat <> '') */) ) {
         $links = _get_discovery_links($pittcat, $worldcat);
+        // Calling all modules implementing hook_discovery_links_alter():
+        drupal_alter('discovery_links', $links);
         if (count($links) > 0) {
           $block['subject'] = 'Discovery System Links';
           $block['pages'] = 'islandora/object/*';
