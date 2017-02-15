@@ -77,7 +77,7 @@ function _get_discovery_links($pittcat, $worldcat) {
 
 function _discovery_identifiers(IslandoraFedoraObject $fedora_object) {
   // run a SOLR query to inspect the values for this PID in the system
-  module_load_include('inc', 'islandora_solr_search', 'includes/utilities');
+  module_load_include('inc', 'islandora_solr', 'includes/utilities');
   $query_processor = new IslandoraSolrQueryProcessor();
   $query_processor->solrQuery = '(PID:' . str_replace(":", "\:", $fedora_object->id) . ')';
   $query_processor->solrStart = 0;
