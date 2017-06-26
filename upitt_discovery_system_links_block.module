@@ -97,7 +97,7 @@ function _discovery_identifiers(IslandoraFedoraObject $fedora_object) {
     if ($tmp['response']['numFound'] > 0) {
       $results = array();
       foreach ($tmp['response']['docs'] as $trip) {
-        $pittcat = $trip['mods_identifier_pitt_s'];
+        $pittcat = (array_key_exists('mods_identifier_pitt_s', $trip) ?  $trip['mods_identifier_pitt_s'] : '');
         $had_ocolc = (array_key_exists('mods_relatedItem_otherFormat_identifier_local_s', $trip) ? (stristr($trip['mods_relatedItem_otherFormat_identifier_local_s'], '(OCOLC)') <> '') : '');
         $worldcat = (array_key_exists('mods_relatedItem_otherFormat_identifier_local_s', $trip) ? str_ireplace('(ocolc)', '', $trip['mods_relatedItem_otherFormat_identifier_local_s']) : '');
       }
